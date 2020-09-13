@@ -5,10 +5,10 @@ parcelRequire=function(e,r,t,n){var i,o="function"==typeof parcelRequire&&parcel
 },{}],"HVjn":[function(require,module,exports) {
 "use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.Eye=void 0;var t=function(){function t(i,s){void 0===s&&(s=4),Object.assign(this,i),s>=0&&(this.pupil=new t({x:this.x,y:this.y,r:this.r/3},s-1))}return t.prototype.look=function(t){var i,s;if(this.pupil){var o=(null===(i=t.curr)||void 0===i?void 0:i.clientX)-this.x,h=(null===(s=t.curr)||void 0===s?void 0:s.clientY)-this.y,r=this.r-this.pupil.r,p=Math.sqrt(Math.pow(o,2)+Math.pow(h,2)),e=Math.atan2(h,o),n=Math.min(p,r);this.pupil.x=this.x+n*Math.cos(e),this.pupil.y=this.y+n*Math.sin(e),this.pupil.look(t)}},t}();exports.Eye=t;
 },{}],"D1Zh":[function(require,module,exports) {
-module.exports="/docs/pencils.70d4307e.png";
+module.exports="pencils.70d4307e.png";
 },{}],"vPWx":[function(require,module,exports) {
 "use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.render=void 0;var e=require("./app"),r=require("./util/color"),t=require("./util/mouse"),i=require("./shapes/eye"),n=new r.HSLA,o=new Image;o.src=require("./images/pencils.png");var l=2*Math.PI;function c(r){var o=window.innerWidth,l=window.innerHeight,c=n.rotate();e.ctx.fillStyle=c,e.ctx.fillRect(0,0,o,l),[new i.Eye({x:o/3,y:l/2,r:l/4}),new i.Eye({x:2*o/3,y:l/2,r:l/4})].forEach(function(r){for(var i=r;i;)i.look(t.mouse),e.ctx.fillStyle=n.rotate(180),u(r),e.ctx.fill(),i=r.pupil})}function u(r){e.ctx.beginPath(),e.ctx.arc(r.x,r.y,r.r,0,l,!1),e.ctx.fill()}exports.render=c;
 },{"./app":"EVxB","./util/color":"SqQR","./util/mouse":"Xfjt","./shapes/eye":"HVjn","./images/pencils.png":"D1Zh"}],"EVxB":[function(require,module,exports) {
 "use strict";Object.defineProperty(exports,"__esModule",{value:!0}),exports.ctx=exports.canvas=void 0;var e=require("./render");function t(e){!function t(n){e(n),requestAnimationFrame(t)}(0)}function n(){exports.canvas.width=window.innerWidth,exports.canvas.height=window.innerHeight}exports.canvas=document.getElementById("root"),exports.ctx=exports.canvas.getContext("2d"),window.addEventListener("resize",n,!1),n(),t(e.render);
 },{"./render":"vPWx"}]},{},["EVxB"], null)
-//# sourceMappingURL=/docs/app.67efffeb.js.map
+//# sourceMappingURL=app.67efffeb.js.map
