@@ -117,32 +117,266 @@ parcelRequire = (function (modules, cache, entry, globalName) {
   }
 
   return newRequire;
-})({"app.ts":[function(require,module,exports) {
-var canvas = document.getElementById('root');
-var ctx = canvas.getContext('2d');
-var hsl = {
-  l: 0,
-  next: function next() {
-    this.l = (this.l + 1) % 360;
-    return "hsla(" + this.l + ", 25%, 50%, 1)";
+})({"util/color.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.HSLA = void 0;
+/**
+ * A representation of the HSL color space https://hslpicker.com/
+ */
+
+var HSLA =
+/** @class */
+function () {
+  function HSLA() {
+    this.hue = 0;
+    this.saturation = '25%';
+    this.luminosity = '50%';
+    this.alpha = 1;
   }
-};
+  /**
+   * Rotate `this.hue` by `hueDelta` degrees and return the string value.
+   */
+
+
+  HSLA.prototype.rotate = function (hueDelta) {
+    if (hueDelta === void 0) {
+      hueDelta = 1;
+    }
+
+    var next = this.hue + hueDelta;
+    this.hue = Number.isSafeInteger(next) ? next : 0;
+    return this.toString();
+  };
+  /**
+   * Encode to something usable by style, canvas etc.
+   */
+
+
+  HSLA.prototype.toString = function () {
+    var _a = this,
+        h = _a.hue,
+        s = _a.saturation,
+        l = _a.luminosity,
+        a = _a.alpha;
+
+    return "hsla(" + [h, s, l, a].join() + ")";
+  };
+
+  return HSLA;
+}();
+
+exports.HSLA = HSLA;
+},{}],"util/mouse.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.mouse = exports.Mouse = void 0;
+
+var Mouse =
+/** @class */
+function () {
+  function Mouse() {
+    var _this = this;
+
+    this.onmousemove = function (event) {
+      _this.prev = _this.curr;
+      _this.curr = event;
+    };
+
+    this.onmousedown = function (event) {
+      _this.down = event;
+      _this.up = undefined;
+    };
+
+    this.onmouseup = function (event) {
+      _this.up = event;
+    };
+
+    this.on();
+  }
+
+  Object.defineProperty(Mouse.prototype, "speeds", {
+    get: function get() {
+      var _a, _b, _c, _d;
+
+      return {
+        dx: ((_a = this.curr) === null || _a === void 0 ? void 0 : _a.clientX) - ((_b = this.prev) === null || _b === void 0 ? void 0 : _b.clientX),
+        dy: ((_c = this.curr) === null || _c === void 0 ? void 0 : _c.clientX) - ((_d = this.prev) === null || _d === void 0 ? void 0 : _d.clientX)
+      };
+    },
+    enumerable: false,
+    configurable: true
+  });
+
+  Mouse.prototype.on = function () {
+    window.addEventListener('mousemove', this.onmousemove);
+    window.addEventListener('mousedown', this.onmousedown);
+    window.addEventListener('mouseup', this.onmouseup);
+  };
+
+  Mouse.prototype.off = function () {
+    window.removeEventListener('mousemove', this.onmousemove);
+    window.removeEventListener('mousedown', this.onmousedown);
+    window.removeEventListener('mouseup', this.onmouseup);
+  };
+
+  return Mouse;
+}();
+
+exports.Mouse = Mouse;
+exports.mouse = new Mouse();
+},{}],"shapes/eye.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.Eye = void 0;
+
+var Eye =
+/** @class */
+function () {
+  function Eye(props, children) {
+    if (children === void 0) {
+      children = 4;
+    }
+
+    Object.assign(this, props);
+
+    if (children >= 0) {
+      this.pupil = new Eye({
+        x: this.x,
+        y: this.y,
+        r: this.r / 3
+      }, children - 1);
+    }
+  }
+
+  Eye.prototype.look = function (mouse) {
+    var _a, _b;
+
+    if (!this.pupil) {
+      return;
+    }
+
+    var dx = ((_a = mouse.curr) === null || _a === void 0 ? void 0 : _a.clientX) - this.x;
+    var dy = ((_b = mouse.curr) === null || _b === void 0 ? void 0 : _b.clientY) - this.y;
+    var limit = this.r - this.pupil.r;
+    var scale = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+    var theta = Math.atan2(dy, dx);
+    var r = Math.min(scale, limit);
+    this.pupil.x = this.x + r * Math.cos(theta);
+    this.pupil.y = this.y + r * Math.sin(theta);
+    this.pupil.look(mouse);
+  };
+
+  return Eye;
+}();
+
+exports.Eye = Eye;
+},{}],"images/pencils.png":[function(require,module,exports) {
+module.exports = "/pencils.9e2a5f80.png";
+},{}],"render.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.render = void 0;
+
+var app_1 = require("./app");
+
+var color_1 = require("./util/color");
+
+var mouse_1 = require("./util/mouse");
+
+var eye_1 = require("./shapes/eye");
+
+var hsla = new color_1.HSLA();
+var pencils = new Image();
+pencils.src = require('./images/pencils.png');
+var PI2 = Math.PI * 2;
+
+function render(time) {
+  var width = window.innerWidth,
+      height = window.innerHeight;
+  var color = hsla.rotate();
+  app_1.ctx.fillStyle = color;
+  app_1.ctx.fillRect(0, 0, width, height);
+  var eyes = [new eye_1.Eye({
+    x: width / 3,
+    y: height / 2,
+    r: height / 4
+  }), new eye_1.Eye({
+    x: 2 * width / 3,
+    y: height / 2,
+    r: height / 4
+  })];
+  eyes.forEach(function (eye) {
+    var curr = eye;
+
+    while (curr) {
+      curr.look(mouse_1.mouse);
+      app_1.ctx.fillStyle = hsla.rotate(180);
+      circle(eye);
+      app_1.ctx.fill();
+      curr = eye.pupil;
+    }
+  }); // // right eye sclera
+  // ctx.beginPath()
+  // circle(right)
+  // ctx.fillStyle = hsla.rotate(-180)
+  // ctx.fill()
+  // // right pupil
+  // ctx.beginPath()
+  // ctx.arc(rightPupil.x, rightPupil.y, pupil.r, 0, PI2, false)
+  // ctx.fillStyle = hsla.rotate(-180)
+  // ctx.fill()
+}
+
+exports.render = render;
+
+function circle(eye) {
+  app_1.ctx.beginPath();
+  app_1.ctx.arc(eye.x, eye.y, eye.r, 0, PI2, false);
+  app_1.ctx.fill();
+}
+},{"./app":"app.ts","./util/color":"util/color.ts","./util/mouse":"util/mouse.ts","./shapes/eye":"shapes/eye.ts","./images/pencils.png":"images/pencils.png"}],"app.ts":[function(require,module,exports) {
+"use strict";
+
+Object.defineProperty(exports, "__esModule", {
+  value: true
+});
+exports.ctx = exports.canvas = void 0;
+
+var render_1 = require("./render");
+
+exports.canvas = document.getElementById('root');
+exports.ctx = exports.canvas.getContext('2d');
 window.addEventListener('resize', resizeCanvas, false);
 resizeCanvas();
-render();
+engine(render_1.render);
 
-function render() {
-  ctx.strokeStyle = 'blue';
-  ctx.lineWidth = '5';
-  ctx.strokeRect(0, 0, window.innerWidth, window.innerHeight);
-  render();
+function engine(frame) {
+  function step(time) {
+    frame(time);
+    requestAnimationFrame(step);
+  }
+
+  step(0);
 }
 
 function resizeCanvas() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+  exports.canvas.width = window.innerWidth;
+  exports.canvas.height = window.innerHeight;
 }
-},{}],"../node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
+},{"./render":"render.ts"}],"../node_modules/parcel/src/builtins/hmr-runtime.js":[function(require,module,exports) {
 var global = arguments[3];
 var OVERLAY_ID = '__parcel__error__overlay__';
 var OldModule = module.bundle.Module;
@@ -170,7 +404,7 @@ var parent = module.bundle.parent;
 if ((!parent || !parent.isParcelRequire) && typeof WebSocket !== 'undefined') {
   var hostname = "" || location.hostname;
   var protocol = location.protocol === 'https:' ? 'wss' : 'ws';
-  var ws = new WebSocket(protocol + '://' + hostname + ':' + "49492" + '/');
+  var ws = new WebSocket(protocol + '://' + hostname + ':' + "63357" + '/');
 
   ws.onmessage = function (event) {
     checkedAssets = {};

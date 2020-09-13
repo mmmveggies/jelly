@@ -1,23 +1,20 @@
-const canvas = document.getElementById('root') as HTMLCanvasElement
-const ctx = canvas.getContext('2d')
+import { render } from "./render"
 
-const hsl = {
-	l: 0,
-	next() {
-		this.l = (this.l + 1) % 360
-		return `hsla(${this.l}, 25%, 50%, 1)`
-	}
-}
+export const canvas = document.getElementById('root') as HTMLCanvasElement
+export const ctx = canvas.getContext('2d')
 
-window.addEventListener('resize', resizeCanvas, false);
+window.addEventListener('resize', resizeCanvas, false)
 resizeCanvas()
-render()
+engine(render)
 
-function render() {
-	ctx.strokeStyle = 'blue';
-	ctx.lineWidth = '5';
-	ctx.strokeRect(0, 0, window.innerWidth, window.innerHeight);
-	render()
+function engine(
+	frame: (time: number) => void
+) {
+	function step(time: number) {
+		frame(time)
+		requestAnimationFrame(step)
+	}
+	step(0)
 }
 
 function resizeCanvas() {
