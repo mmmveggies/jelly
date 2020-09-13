@@ -1,4 +1,5 @@
 import { Mouse } from "../util/mouse"
+import { HSLA } from "../util/color"
 
 export class Eye {
 	x!: number
@@ -7,15 +8,15 @@ export class Eye {
 
 	pupil?: Eye
 
-	constructor(props?: any, children = 4) {
+	constructor(props?: any) {
 		Object.assign(this, props)
 
-		if (children >= 0) {
+		if (this.r >= 10) {
 			this.pupil = new Eye({
 				x: this.x,
 				y: this.y,
-				r: this.r / 3,
-			}, children - 1)
+				r: this.r * 0.8,
+			})
 		}
 	}
 
@@ -37,5 +38,17 @@ export class Eye {
 		this.pupil.y = this.y + r * Math.sin(theta)
 
 		this.pupil.look(mouse)
+	}
+
+	draw(
+		ctx: CanvasRenderingContext2D,
+		color: HSLA
+	) {
+		ctx.fillStyle = color.rotate(60)
+		ctx.beginPath()
+		ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2, false)
+		ctx.fill()
+
+		this.pupil?.draw(ctx, color)
 	}
 }

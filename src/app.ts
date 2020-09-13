@@ -8,10 +8,12 @@ resizeCanvas()
 engine(render)
 
 function engine(
-	frame: (time: number) => void
+	draw: (time: number, frame: number) => void
 ) {
+	let frame = 0
 	function step(time: number) {
-		frame(time)
+		draw(time, frame)
+		frame += 1
 		requestAnimationFrame(step)
 	}
 	step(0)
