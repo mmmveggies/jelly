@@ -11,7 +11,7 @@ export class Eye {
 	constructor(props?: any) {
 		Object.assign(this, props)
 
-		if (this.r >= 10) {
+		if (this.r > 1) {
 			this.pupil = new Eye({
 				x: this.x,
 				y: this.y,
@@ -25,15 +25,14 @@ export class Eye {
 			return
 		}
 
-		const dx = (mouse.curr?.clientX - this.x)
-		const dy = (mouse.curr?.clientY - this.y)
+		const dx = mouse.curr?.clientX - this.x
+		const dy = mouse.curr?.clientY - this.y
 
+		const distance = Math.sqrt(dx ** 2 + dy ** 2)
 		const limit = this.r - this.pupil.r
-		const scale = Math.sqrt(dx ** 2 + dy ** 2)
+		const r = Math.min(distance, limit)
+
 		const theta = Math.atan2(dy, dx)
-
-		const r = Math.min(scale, limit)
-
 		this.pupil.x = this.x + r * Math.cos(theta)
 		this.pupil.y = this.y + r * Math.sin(theta)
 
@@ -44,7 +43,7 @@ export class Eye {
 		ctx: CanvasRenderingContext2D,
 		color: HSLA
 	) {
-		ctx.fillStyle = color.rotate(60)
+		ctx.fillStyle = color.rotate(10)
 		ctx.beginPath()
 		ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2, false)
 		ctx.fill()
