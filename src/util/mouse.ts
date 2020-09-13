@@ -20,12 +20,14 @@ export class Mouse {
 		window.addEventListener('mousemove', this.onmousemove)
 		window.addEventListener('mousedown', this.onmousedown)
 		window.addEventListener('mouseup', this.onmouseup)
+		window.addEventListener('touchmove', this.ontouchmove)
 	}
 
 	off() {
 		window.removeEventListener('mousemove', this.onmousemove)
 		window.removeEventListener('mousedown', this.onmousedown)
 		window.removeEventListener('mouseup', this.onmouseup)
+		window.removeEventListener('touchmove', this.ontouchmove)
 	}
 
 	private onmousemove = (event: MouseEvent) => {
@@ -38,6 +40,10 @@ export class Mouse {
 	}
 	private onmouseup = (event: MouseEvent) => {
 		this.up = event
+	}
+	private ontouchmove = (event: TouchEvent) => {
+		this.prev = this.curr
+		this.curr = event.touches[0] as any
 	}
 }
 
